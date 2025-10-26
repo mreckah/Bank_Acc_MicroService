@@ -7,6 +7,7 @@ import com.oussama.acc_servie.entities.Customer;
 import com.oussama.acc_servie.repositories.BankAccountRepository;
 import com.oussama.acc_servie.repositories.CustomerRepository;
 import com.oussama.acc_servie.service.AccountService;
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
@@ -15,15 +16,16 @@ import org.springframework.stereotype.Controller;
 import java.util.List;
 
 @Controller
+@Hidden
 public class BankAccountGraphQLController {
-    
+
     private final BankAccountRepository bankAccountRepository;
     private final CustomerRepository customerRepository;
     private final AccountService accountService;
 
     public BankAccountGraphQLController(BankAccountRepository bankAccountRepository,
-                                       CustomerRepository customerRepository,
-                                       AccountService accountService) {
+            CustomerRepository customerRepository,
+            AccountService accountService) {
         this.bankAccountRepository = bankAccountRepository;
         this.customerRepository = customerRepository;
         this.accountService = accountService;
@@ -57,9 +59,9 @@ public class BankAccountGraphQLController {
         requestDTO.setBalance(input.balance());
         requestDTO.setCurrency(input.currency());
         requestDTO.setType(input.type());
-        
+
         BankAccountResponseDTO responseDTO = accountService.addAccount(requestDTO);
-        
+
         return bankAccountRepository.findById(responseDTO.getId())
                 .orElseThrow(() -> new RuntimeException("Failed to create account"));
     }
@@ -68,7 +70,7 @@ public class BankAccountGraphQLController {
     public BankAccount updateBankAccount(@Argument String id, @Argument BankAccountInput input) {
         BankAccount account = bankAccountRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Account not found with id: " + id));
-        
+
         if (input.balance() != null) {
             account.setBalance(input.balance());
         }
@@ -78,7 +80,7 @@ public class BankAccountGraphQLController {
         if (input.type() != null) {
             account.setType(input.type());
         }
-        
+
         return bankAccountRepository.save(account);
     }
 
@@ -92,5 +94,5 @@ public class BankAccountGraphQLController {
     }
 }
 
-record BankAccountInput(Double balance, String currency, com.oussama.acc_servie.enums.AccountType type) {}
-
+record BankAccountInput(Double balance, String currency, com.oussama.acc_servie.enums.AccountType type) {
+}
