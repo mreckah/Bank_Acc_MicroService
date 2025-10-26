@@ -8,7 +8,6 @@ import com.oussama.acc_servie.repositories.BankAccountRepository;
 import com.oussama.acc_servie.service.AccountService;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -27,14 +26,18 @@ public class AccountRestController {
 
     // pour consulter les comptes
     @GetMapping("/bankAccounts")
-    public List<BankAccount> bankAccounts() {
-        return bankAccountRepository.findAll();
+    public List<BankAccountResponseDTO> bankAccounts() {
+        return bankAccountRepository.findAll()
+                .stream()
+                .map(accountMapper::fromBankAccount)
+                .toList();
     }
 
     @GetMapping("/bankAccounts/{id}")
-    public BankAccount bankAccount(@PathVariable String id) {
-        return bankAccountRepository.findById(id)
+    public BankAccountResponseDTO bankAccount(@PathVariable String id) {
+        BankAccount bankAccount = bankAccountRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException(String.format("Account with id %s not found", id)));
+        return accountMapper.fromBankAccount(bankAccount);
     }
 
     @PostMapping("/bankAccounts")
@@ -44,17 +47,17 @@ public class AccountRestController {
     }
 
     @PutMapping("/bankAccounts/{id}")
-    public BankAccount Update(@PathVariable String id, @RequestBody BankAccount bankAccount) {
-        BankAccount account = bankAccountRepository.findById(id).orElseThrow();
-        if (bankAccount.getBalance() != null)
-            account.setBalance(bankAccount.getBalance());
-        if (bankAccount.getType() != null)
-            account.setType(bankAccount.getType());
-        if (bankAccount.getCreatedAt() != null)
-            account.setCreatedAt(new Date());
-        if (bankAccount.getCurrency() != null)
-            account.setCurrency(bankAccount.getCurrency());
-        return bankAccountRepository.save(bankAccount);
+    public BankAccountResponseDTO Update(@PathVariable String id, @RequestBody BankAccountRequestDTO requestDTO) {
+        BankAccount account = bankAccountRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException(String.format("Account with id %s not found", id)));
+        if (requestDTO.getBalance() != null)
+            account.setBalance(requestDTO.getBalance());
+        if (requestDTO.getType() != null)
+            account.setType(requestDTO.getType());
+        if (requestDTO.getCurrency() != null)
+            account.setCurrency(requestDTO.getCurrency());
+        BankAccount updatedAccount = bankAccountRepository.save(account);
+        return accountMapper.fromBankAccount(updatedAccount);
     }
 
     @DeleteMapping("/bankAccounts/{id}")

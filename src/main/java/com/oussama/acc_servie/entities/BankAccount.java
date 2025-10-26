@@ -1,5 +1,6 @@
 package com.oussama.acc_servie.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oussama.acc_servie.enums.AccountType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -23,5 +24,6 @@ public class BankAccount {
     @Enumerated(EnumType.STRING)
     private AccountType type;
     @ManyToOne
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Customer customer;
 }
